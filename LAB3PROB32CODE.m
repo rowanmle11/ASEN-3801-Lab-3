@@ -19,6 +19,12 @@ trials = [trial_torque4 trial_torque8 trial_torque12 trial_torque16 trial_torque
 trials_data = cell(1, length(trials));
 torques = [4 8 12 16 20];
 
+figure(1);
+sgtitle('Torque vs Time for All Trials');
+
+figure(2);
+sgtitle('Angular Velocity vs Time for All Trials')
+
 for i = 1:length(trials)
 
     trials_data{i} = readmatrix(trials(i));
@@ -43,18 +49,20 @@ for i = 1:length(trials)
     linear_idx_tor = (time{i} >= t_min & time{i} <= t_max);
     avg_torque = mean(torque{i}(linear_idx_tor));
 
-    figure()
+    figure(1)
+    subplot(2,3,i)
     plot(time{i}, torque{i})
     hold on;
     yline(avg_torque,'r', 'LineWidth', 2)
     title(['Torque for Trial ' num2str(i) ': ' num2str(torques(i)) ' mNm']);
     xlabel('Time (s)');
     ylabel('Torque (mNm)');
-    legend('Measured Torque', 'Average Torque', 'Location', 'best');
+    legend('Measured Torque', 'Average Torque', 'Location', 'southwest');
     grid on;
     hold off; % Release the hold on the current figure
 
-    figure()
+    figure(2)
+    subplot(2,3,i)
     plot(time{i}, angular_velocity{i}, 'b');
     hold on;
     plot(time{i}(linear_idx), w_fit, 'r', 'LineWidth', 2);
