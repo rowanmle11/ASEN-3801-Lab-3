@@ -66,10 +66,11 @@ figure
 scatter(data_rate_rads, input_data_gyro_output, 2, 'b', 'filled')
 hold on
 plot(data_rate_rads, f, 'r', 'LineWidth', 1.5)
+yline(b_mean, '--k')
 xlabel('Encoder Angular Rate (rad/s)')
 ylabel('Gyro Output (rad/s)')
 title(['Calibration: ', test_label])
-legend('Data', 'Linear Fit', 'Location', 'best')
+legend('Data', 'Linear Fit', 'Mean Bias', 'Location', 'best')
 grid on
 
 fprintf('\nMean K = %.4f ± %.4f\n', K_mean, K_std)
