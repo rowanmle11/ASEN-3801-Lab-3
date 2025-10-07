@@ -4,7 +4,7 @@ close all
 
 %% bringing in files
 
-filename = '2025_09_23_002_F02A05.csv.xlsx';
+filename = '2025_09_23_002_F10A10.csv.xlsx';
 header_lines = 2;
 data = readmatrix(filename, "NumHeaderLines", header_lines);
 
@@ -24,55 +24,22 @@ plot(data_time, input_data_gyro_output, '-b')
 xlabel('Time (s)')
 ylabel('Angular Rate (rad/s)')
 legend('Angular Rate', 'Gyro Output')
+title('Angular Rate vs Time')
 grid on
 
-% [P, S] = polyfit(data_rate_rads, input_data_gyro_output, 1);
-% K = P(1); % slope = adjusted scale factor
-% b = P(2); % intercept = bias
+[P, S] = polyfit(data_rate_rads, input_data_gyro_output, 1);
+K = P(1); % slope = adjusted scale factor
+b = P(2); % intercept = bias
 
-% calib_rate = (input_data_gyro_output - b) ./ K;
-% f = polyval(P, data_rate_rads);
+calib_rate = (input_data_gyro_output - b) ./ K;
+f = polyval(P, data_rate_rads);
 
-files = {'2025_09_23_002_F02A05.csv.xlsx',...
-         '2025_09_23_002_F04A10.csv.xlsx',...
-         '2025_09_23_002_F10A10.csv.xlsx'};
+test_label = 'Freq = 1.0 Hz, Amp = 1.0 A';
 
-test_labels = {'Freq = 0.2 Hz, Amp = 0.5 A',...
-               'Freq = 0.4 Hz, Amp = 1.0 A',...
-               'Freq = 1.0 Hz, Amp = 1.0 A'};
-
-K_all = [];
-b_all = [];
-
-for i = 1:length(files)
-    data = readmatrix(files{i}, "NumHeaderLines", header_lines);
-    time = data(:,1) - data(1,1);
-    gyro = data(:,2);
-    rate_rads = data(:,3) .* (2.*pi./60);
-
-    [P, S] = polyfit(rate_rads, gyro, 1);
-    K_all(i) = P(1);
-    b_all(i) = P(2);
-
-    calib_rate = (input_data_gyro_output - b_all) ./ K_all;
-
-    figure
-    scatter(rate_rads, gyro, 2, 'b', 'filled')
-    hold on
-    f = polyval(P, rate_rads);
-    plot(rate_rads, f, 'r', 'LineWidth', 1.5)
-    xlabel('Encoder Angular Rate (rad/s)')
-    ylabel('Gyro Output (rad/s)')
-    title(['Calibration: ', test_labels{i}])
-    legend('Data', 'Linear Fit', 'Location', 'best')
-    grid on
-
-end
-
-K_mean = mean(K_all);
-K_std = std(K_all);
-b_mean = mean(b_all);
-b_std = std(b_all);
+K_mean = mean(K);
+K_std = std(K);
+b_mean = mean(b);
+b_std = std(b);
 
 %% 3.1d (Gyro Analysis)
 
@@ -95,9 +62,16 @@ legend('Encoder Rate (Truth)', 'Calibrated Gyro Rate')
 title('Time History of Calibrated Gyro vs Encoder')
 grid on
 
-T = table(test_labels', K_all', b_all', ...
-           'VariableNames', {'Trial', 'ScaleFactor K', 'Bias b'});
-disp(T)
+figure
+scatter(data_rate_rads, input_data_gyro_output, 2, 'b', 'filled')
+hold on
+plot(data_rate_rads, f, 'r', 'LineWidth', 1.5)
+xlabel('Encoder Angular Rate (rad/s)')
+ylabel('Gyro Output (rad/s)')
+title(['Calibration: ', test_label])
+legend('Data', 'Linear Fit', 'Location', 'best')
+grid on
+
 fprintf('\nMean K = %.4f ± %.4f\n', K_mean, K_std)
 fprintf('Mean b = %.4f ± %.4f\n', b_mean, b_std)
 
@@ -106,7 +80,6 @@ plot(data_time, rate_error)
 xlabel('Time (s)')
 ylabel('Rate Error (rad/s)')
 title('Angular Rate Measurement Error')
-legend('0.2 Hz, 0.5 A', '0.4 Hz, 1.0 A', '1.0 Hz, 1.0 A')
 grid on
 
 figure
@@ -115,7 +88,6 @@ xlabel('Time (s)')
 ylabel('Angular Position (rad)')
 legend('Encoder (Truth)', 'Gyro (Measured)')
 title('Angular Position Comparison')
-legend('0.2 Hz, 0.5 A', '0.4 Hz, 1.0 A', '1.0 Hz, 1.0 A')
 grid on
 
 figure
@@ -123,7 +95,6 @@ plot(data_time, pos_error)
 xlabel('Time (s)')
 ylabel('Angular Position Error (rad)')
 title('Angular Position Error vs. Time')
-legend('0.2 Hz, 0.5 A', '0.4 Hz, 1.0 A', '1.0 Hz, 1.0 A')
 grid on
 
 figure
@@ -131,5 +102,4 @@ plot(data_rate_rads, pos_error, '.')
 xlabel('Encoder Rate (rad/s)')
 ylabel('Angular Position Error (rad)')
 title('Angular Position Error vs Encoder Rate')
-legend('0.2 Hz, 0.5 A', '0.4 Hz, 1.0 A', '1.0 Hz, 1.0 A')
 grid on
